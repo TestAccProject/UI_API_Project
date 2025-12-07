@@ -12,7 +12,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
@@ -41,14 +41,14 @@ jobs:
 
     - name: Upload Allure report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: allure-report
         path: reports/allure-report
 
     - name: Upload raw Allure results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: allure-results
         path: reports/allure-results
@@ -59,7 +59,7 @@ jobs:
 
     - name: Upload HTML report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pytest-html-report
         path: reports/report.html
