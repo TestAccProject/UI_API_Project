@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=45"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "-v --alluredir=reports/allure-results --tb=short"
+testpaths = "tests"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+markers = [
+    "ui: marks tests as UI (playwright)",
+    "api: marks tests as API (requests)",
+    "smoke: marks tests as smoke"
+]

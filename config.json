@@ -1,0 +1,18 @@
+{
+  "Headless": true,
+  "SlowMo": "0",
+  "DefaultNavigationTimeout": "120000",
+  "DefaultTimeout": "60000",
+  "common info":
+  {
+    "Url": "https://parabank.parasoft.com",
+    "BaseApiUrl": "https://parabank.parasoft.com/parabank/services/bank",
+    "UserName": "john",
+    "Password": "demo",
+    "User": "John Smith",
+    "Account Number": "12345",
+    "Account Type": "CHECKING",
+    "Balance": -2832.00,
+    "customerId": "12212"
+  }
+}
