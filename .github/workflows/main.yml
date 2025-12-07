@@ -17,7 +17,18 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libasound2t64 libnss3 libatk-bridge2.0-0 libgtk-3-0 libappindicator3-1 libxss1 libgbm-dev
+        sudo apt-get install -y --no-install-recommends \
+          libasound2t64 \
+          libnss3 \
+          libatk-bridge2.0-0 \
+          libgtk-3-0 \
+          libappindicator3-1 \
+          libxss1 \
+          libgbm-dev \
+          libffi8 \
+          libglib2.0-0 \
+          libnss3 \
+          libxshmfence-dev
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
@@ -36,7 +47,7 @@ jobs:
       run: |
         ALLURE_VERSION=2.25.0
         ALLURE_DOWNLOAD_URL="https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.zip"
-        wget "$ALLURE_DOWNLOAD_URL" -O allure.zip
+        curl -L "$ALLURE_DOWNLOAD_URL" -o allure.zip
         sudo unzip allure.zip -d /opt/allure
         echo "/opt/allure/allure-commandline-$ALLURE_VERSION/bin" >> $GITHUB_PATH
         allure --version
