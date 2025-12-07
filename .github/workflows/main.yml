@@ -19,14 +19,40 @@ jobs:
       with:
         python-version: '3.11'
         
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Install Playwright browsers
+    - name: Get installed Playwright version
+      id: playwright-version
       run: |
-        python -m playwright install chromium --with-deps
+        PLAYWRIGHT_VERSION=$(python -c "import playwright; print(playwright.__version__)")
+        echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+        echo "Playwright version: $PLAYWRIGHT_VERSION"
+        
+    - name: Cache Playwright browsers
+      uses: actions/cache@v3
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+        
+    - name: Install Playwright browsers and dependencies
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      run: |
+        python -m playwright install --with-deps chromium
+        
+    - name: Install Playwright system dependencies (if cache hit)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      run: |
+        python -m playwright install-deps chromium
+        
+    - name: Verify Playwright installation
+      run: |
+        echo "Checking Playwright browser installation..."
+        ls -la ~/.cache/ms-playwright/ || echo "Playwright cache directory not found"
+        python -m playwright --version
         
     - name: Install Allure command line
       run: |
