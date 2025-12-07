@@ -54,7 +54,7 @@ def default_timeout(pytestconfig):
 
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def setup(request, page):
     if request.cls is not None:
         request.cls.page = page
