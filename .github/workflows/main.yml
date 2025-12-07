@@ -1,87 +1,70 @@
 name: CI Pipeline for ParaBank QA Framework
-
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
-
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-          libasound2t64 \
-          libnss3 \
-          libatk-bridge2.0-0 \
-          libgtk-3-0 \
-          libappindicator3-1 \
-          libxss1 \
-          libgbm-dev \
-          libffi8 \
-          libglib2.0-0 \
-          libnss3 \
-          libxshmfence-dev
-
+      
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-
+        
     - name: Install Playwright browsers
-      run: playwright install --with-deps
-
-    - name: Install Allure command line (Direct Download)
+      run: playwright install --with-deps chromium
+      
+    - name: Install Allure command line
       run: |
         ALLURE_VERSION=2.25.0
         ALLURE_DOWNLOAD_URL="https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.zip"
         curl -L "$ALLURE_DOWNLOAD_URL" -o allure.zip
         sudo unzip allure.zip -d /opt/allure
         echo "/opt/allure/allure-commandline-$ALLURE_VERSION/bin" >> $GITHUB_PATH
-        allure --version
-
+        
+    - name: Verify Allure installation
+      run: /opt/allure/allure-commandline-2.25.0/bin/allure --version
+      
     - name: Run API tests
       run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
-
+      
     - name: Run UI tests
       run: pytest tests/test_ui/ -v -m ui --alluredir=reports/allure-results
-
+      
     - name: Generate Allure report
       if: always()
       run: |
         mkdir -p reports/allure-report
         allure generate reports/allure-results -o reports/allure-report --clean
-
+        
     - name: Upload Allure report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: allure-report
         path: reports/allure-report
-
+        
     - name: Upload raw Allure results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: allure-results
         path: reports/allure-results
-
+        
     - name: Generate HTML report
       if: always()
       run: pytest -v -m smoke --html=reports/report.html --self-contained-html
-
+      
     - name: Upload HTML report
       if: always()
       uses: actions/upload-artifact@v4
