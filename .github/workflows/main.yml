@@ -28,15 +28,15 @@ jobs:
     - name: Ensure browsers are installed
       run: python -m playwright install --with-deps
     - name: Run API tests
-      run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
+      run: pytest tests/test_api/ -v -m api --allure
     - name: Run UI tests
-      run: pytest tests/test_ui/ -v -m ui --alluredir=reports/allure-results
+      run: pytest tests/test_ui/ -v -m ui --allure
     
     
     - name: Generate Allure report
       if: always()
       run: |
-        mkdir -p reports/allure-report
+        mkdir -p reports/allure-results
         allure generate allure-results -o allure-report --clean
         
     - name: Upload Allure report
@@ -44,7 +44,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: allure-report
-        path: reports/allure-report
+        path: reports/allure-results
         
     - name: Upload raw Allure results
       if: always()
@@ -58,5 +58,5 @@ jobs:
       if: always()
       with:
         name: playwright-html-report
-        path: Report/report.html 
+        path: Report
         retention-days: 2
