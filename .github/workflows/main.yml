@@ -20,7 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install -r ParaBank_UI_API_Project/requirements.txt
+        pip install -r UI_API_Project/requirements.txt
 
     - name: Check pytest plugins
       run: |
