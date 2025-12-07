@@ -2,46 +2,64 @@ name: CI Pipeline for ParaBank QA Framework
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11']  # Use Python 3.11+
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        playwright install --with-deps
 
-    - name: Run Tests
-      run: pytest -v -m "smoke or ui or api" --alluredir=reports/allure-results
+    - name: Install Playwright browsers
+      run: playwright install --with-deps
 
-    - name: Generate Allure Report
+    - name: Run API tests
+      run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
+
+    - name: Run UI tests
+      run: pytest tests/test_ui/ -v -m ui --alluredir=reports/allure-results
+
+    - name: Generate Allure report
       if: always()
-      uses: simple-elf/allure-report-action@master
-      with:
-        allure_results: reports/allure-results
-        gh_pages: gh-pages
-        allure_report: allure-report
-        allure_history: allure-history
+      run: |
+        mkdir -p reports/allure-report
+        allure generate reports/allure-results -o reports/allure-report --clean
 
-    - name: Upload Allure Report
+    - name: Upload Allure report
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: allure-report
-        path: allure-report
+        path: reports/allure-report
+
+    - name: Upload raw Allure results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: allure-results
+        path: reports/allure-results
+
+    - name: Generate HTML report
+      if: always()
+      run: pytest -v -m smoke --html=reports/report.html --self-contained-html
+
+    - name: Upload HTML report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: pytest-html-report
+        path: reports/report.html
