@@ -1,0 +1,61 @@
+name: CI Pipeline for ParaBank UI API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ParaBank_UI_API_Project/requirements.txt
+        pip install playwright  # in case it's not installed
+        npx playwright install-deps
+        playwright install
+
+    - name: Check pytest plugins
+      run: |
+        pip list | grep pytest
+        pytest --version
+        pytest --trace-config
+
+    - name: Run Tests and Generate Reports
+      run: |
+        mkdir -p reports/allure-results Report
+        pytest ParaBank_UI_API_Project/tests \
+        -v \
+        --alluredir=reports/allure-results \
+        --html=Report/report.html \
+        --self-contained-html
+
+    - name: List report files
+      run: |
+        ls -R reports
+        ls -R Report
+
+    - name: Upload HTML Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-html-report
+        path: Report/report.html
+
+    - name: Upload Allure Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results
+        path: reports/allure-results
