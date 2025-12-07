@@ -2,109 +2,46 @@ name: CI Pipeline for ParaBank QA Framework
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main, develop ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        python-version: ['3.11']  # Use Python 3.11+
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python 3.11
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
-        
-    - name: Install Python dependencies
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
-    - name: Get installed Playwright version
-      id: playwright-version
-      run: |
-        PLAYWRIGHT_VERSION=$(pip show playwright | grep Version | cut -d' ' -f2)
-        echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
-        echo "Playwright version: $PLAYWRIGHT_VERSION"
-        
-    - name: Cache Playwright browsers
-      uses: actions/cache@v3
-      id: playwright-cache
+        playwright install --with-deps
+
+    - name: Run Tests
+      run: pytest -v -m "smoke or ui or api" --alluredir=reports/allure-results
+
+    - name: Generate Allure Report
+      if: always()
+      uses: simple-elf/allure-report-action@master
       with:
-        path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-        
-    - name: Install Playwright browsers and dependencies
-      if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: |
-        python -m playwright install --with-deps chromium
-        
-    - name: Install Playwright system dependencies (if cache hit)
-      if: steps.playwright-cache.outputs.cache-hit == 'true'
-      run: |
-        python -m playwright install-deps chromium
-        
-    - name: Verify Playwright installation
-      run: |
-        echo "Checking Playwright browser installation..."
-        ls -la ~/.cache/ms-playwright/ || echo "Playwright cache directory not found"
-        python -m playwright --version
-        
-    - name: Install Allure command line
-      run: |
-        ALLURE_VERSION=2.25.0
-        echo "Downloading Allure $ALLURE_VERSION..."
-        ALLURE_DOWNLOAD_URL="https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.zip"
-        curl -L "$ALLURE_DOWNLOAD_URL" -o allure.zip
-        echo "Unzipping Allure..."
-        sudo unzip -q allure.zip -d /opt/allure
-        echo "Creating symbolic link..."
-        sudo ln -sf /opt/allure/allure-$ALLURE_VERSION/bin/allure /usr/local/bin/allure
-        echo "Allure installation complete"
-        ls -la /opt/allure/
-        
-    - name: Verify Allure installation
-      run: |
-        which allure
-        allure --version
-      
-    - name: Run API tests
-      run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
-      
-    - name: Run UI tests
-      run: pytest tests/test_ui/ -v -m ui --alluredir=reports/allure-results
-      
-    - name: Generate Allure report
+        allure_results: reports/allure-results
+        gh_pages: gh-pages
+        allure_report: allure-report
+        allure_history: allure-history
+
+    - name: Upload Allure Report
       if: always()
-      run: |
-        mkdir -p reports/allure-report
-        allure generate reports/allure-results -o reports/allure-report --clean
-        
-    - name: Upload Allure report
-      if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: allure-report
-        path: reports/allure-report
-        
-    - name: Upload raw Allure results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: allure-results
-        path: reports/allure-results
-        
-    - name: Generate HTML report
-      if: always()
-      run: pytest -v -m smoke --html=reports/report.html --self-contained-html
-      
-    - name: Upload HTML report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: pytest-html-report
-        path: reports/report.html
+        path: allure-report
