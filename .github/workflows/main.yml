@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v5
     - name: Set up Python
@@ -19,14 +19,21 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libasound2t64 libffi7 libx264-163 libffi8 libx264
+        sudo apt-get install -y libasound2 libffi7 libx264-163
  
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    
     - name: Ensure browsers are installed
       run: python -m playwright install --with-deps
+    
+    - name: Install Allure CLI
+      uses: simple-elf/setup-allure-cli@v1
+      with:
+        allure-version: '2.25.0'
+    
     - name: Run API tests
       run: pytest tests/test_api/ -v -m api --allure
     - name: Run UI tests
