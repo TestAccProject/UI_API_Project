@@ -27,7 +27,7 @@ jobs:
     - name: Get installed Playwright version
       id: playwright-version
       run: |
-        PLAYWRIGHT_VERSION=$(python -c "import playwright; print(playwright.__version__)")
+        PLAYWRIGHT_VERSION=$(pip show playwright | grep Version | cut -d' ' -f2)
         echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
         echo "Playwright version: $PLAYWRIGHT_VERSION"
         
@@ -57,13 +57,20 @@ jobs:
     - name: Install Allure command line
       run: |
         ALLURE_VERSION=2.25.0
+        echo "Downloading Allure $ALLURE_VERSION..."
         ALLURE_DOWNLOAD_URL="https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.zip"
         curl -L "$ALLURE_DOWNLOAD_URL" -o allure.zip
-        sudo unzip allure.zip -d /opt/allure
-        sudo ln -s /opt/allure/allure-commandline-$ALLURE_VERSION/bin/allure /usr/local/bin/allure
+        echo "Unzipping Allure..."
+        sudo unzip -q allure.zip -d /opt/allure
+        echo "Creating symbolic link..."
+        sudo ln -sf /opt/allure/allure-$ALLURE_VERSION/bin/allure /usr/local/bin/allure
+        echo "Allure installation complete"
+        ls -la /opt/allure/
         
     - name: Verify Allure installation
-      run: allure --version
+      run: |
+        which allure
+        allure --version
       
     - name: Run API tests
       run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
