@@ -1,12 +1,15 @@
 name: CI Pipeline for ParaBank QA Framework
+
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -22,18 +25,19 @@ jobs:
         pip install -r requirements.txt
         
     - name: Install Playwright browsers
-      run: playwright install --with-deps chromium
-      
+      run: |
+        python -m playwright install chromium --with-deps
+        
     - name: Install Allure command line
       run: |
         ALLURE_VERSION=2.25.0
         ALLURE_DOWNLOAD_URL="https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/$ALLURE_VERSION/allure-commandline-$ALLURE_VERSION.zip"
         curl -L "$ALLURE_DOWNLOAD_URL" -o allure.zip
         sudo unzip allure.zip -d /opt/allure
-        echo "/opt/allure/allure-commandline-$ALLURE_VERSION/bin" >> $GITHUB_PATH
+        sudo ln -s /opt/allure/allure-commandline-$ALLURE_VERSION/bin/allure /usr/local/bin/allure
         
     - name: Verify Allure installation
-      run: /opt/allure/allure-commandline-2.25.0/bin/allure --version
+      run: allure --version
       
     - name: Run API tests
       run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
