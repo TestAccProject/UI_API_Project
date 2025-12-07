@@ -14,18 +14,33 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # FIX 1: Install system dependencies for Playwright and other libraries
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2 libnss3 libatk-bridge2.0-0 libgtk-3-0 libappindicator3-1 libxss1 libgbm-dev
+
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
 
+    # FIX 2: Ensure the correct path to requirements.txt and make sure pytest-html is listed inside it
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        # Change 'requirements.txt' to the correct path if it's in a subfolder
+        # pip install -r ParaBank_UI_API_Project/requirements.txt 
+        pip install -r requirements.txt # Using the path you confirmed, assuming the command is run from the project root
 
     - name: Install Playwright browsers
       run: playwright install --with-deps
+
+    # FIX 3: Install the Allure command-line tool
+    - name: Install Allure command line
+      uses: jakejarvis/install-allure-action@v2
+      with:
+        version: 2.18.1 
 
     - name: Run API tests
       run: pytest tests/test_api/ -v -m api --alluredir=reports/allure-results
