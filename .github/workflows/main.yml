@@ -1,6 +1,6 @@
 name: CI Pipeline for ParaBank QA Framework
 
-on: worflow_dispatch
+on: [push]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
