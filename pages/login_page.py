@@ -28,7 +28,7 @@ class LoginPage(BasePage):
 
     def enter_invalid_username(self):
         self.wait_and_fill(self.page.locator(self._Selectors.USERNAME_FIELD), "wrongUser")
-    #  for this site only empty fields can call error message, if enters any char site logged user in
+        
     def enter_invalid_password(self):
         self.wait_and_fill(self.page.locator(self._Selectors.PASSWORD_FIELD), "")
 
