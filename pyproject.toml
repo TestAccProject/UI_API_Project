@@ -3,13 +3,16 @@ requires = ["setuptools>=45"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
-addopts = "-v --alluredir=reports/allure-results --tb=short"
+addopts = "-v --html=Report/report.html --self-contained-html --alluredir=reports/allure-results --tb=short --browser=chromium"
 testpaths = "tests"
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+playwright_page_scope = "class"
+importmode = "prepend"
+pythonpath = "."
 markers = [
-    "ui: marks tests as UI (playwright)",
+    "smoke: marks tests as smoke",
     "api: marks tests as API (requests)",
-    "smoke: marks tests as smoke"
+    "ui: marks tests as UI (playwright)"
 ]

@@ -1,0 +1,8 @@
+"BROKEN","EPIC","FAILED","FEATURE","PASSED","SKIPPED","STORY","UNKNOWN"
+"0","","1","Transfer funds between own accounts","0","0","User should be able to transfer funds between own accounts","0"
+"0","","5","Account Overview","0","0","Account Number Is Verified","0"
+"0","","2","Login Page","0","0","Login Functionality","0"
+"0","","0","Accounts API","1","0","Retrieve Account List","0"
+"0","","0","Customers API","2","0","Retrieve Customer Information","0"
+"0","","1","Transfers API","0","0","Create Transfer Resource","0"
+"0","","0","Accounts API","1","0","Negative: Invalid Account ID","0"
