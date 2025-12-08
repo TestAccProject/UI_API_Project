@@ -1,12 +1,12 @@
 import sys
 import os
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 import pytest
 from endpoints.login_endpoint import LoginEndpoint
 from utils.read_config import AppConfiguration
 import logging
-
 
 pytest_plugins = ["pytest_playwright"]
 logger = logging.getLogger(__name__)
@@ -21,7 +21,6 @@ def browser_type_launch_args(browser_type, pytestconfig):
     else:
         headless_str = str(headless_value).strip().lower()
         headless = headless_str == "true"
-
     slow_mo = float(configuration["SlowMo"])
     return {
         "headless": headless,
@@ -31,14 +30,26 @@ def browser_type_launch_args(browser_type, pytestconfig):
 
 
 @pytest.fixture(scope="session")
-def context_args(browser_context_args, pytestconfig):
+def browser_context_args(pytestconfig):
     configuration = AppConfiguration.get_app_configuration()
     common_info = AppConfiguration.get_common_info()
+
     return {
-        **browser_context_args,
         "base_url": common_info["Url"],
-        "no_viewport": True
+        "no_viewport": True,
+        "viewport": None,
     }
+
+
+@pytest.fixture(scope="session")
+def context(browser, browser_context_args, default_navigation_timeout, default_timeout):
+    context = browser.new_context(**browser_context_args)
+    context.set_default_timeout(default_timeout)
+    context.set_default_navigation_timeout(default_navigation_timeout)
+
+    yield context
+
+    context.close()
 
 
 @pytest.fixture(scope="session")
@@ -53,12 +64,22 @@ def default_timeout(pytestconfig):
     return float(configuration["DefaultTimeout"])
 
 
+@pytest.fixture(scope="function")
+def page(context):
+    page = context.new_page()
+
+    yield page
+
+    page.close()
+
 
 @pytest.fixture(scope="function")
 def setup(request, page):
     if request.cls is not None:
         request.cls.page = page
+
     yield page
+
 
 
 @pytest.fixture(scope="session")
@@ -66,5 +87,5 @@ def customer_id():
     login_endpoint = LoginEndpoint()
     customer_id = login_endpoint.login()
     logger.info(f"Logged in; customerId: {customer_id}")
-    yield customer_id
 
+    yield customer_id

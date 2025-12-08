@@ -10,6 +10,7 @@ from pages.transfer_funds_page import TransferFundsPage
 
 @allure.feature("Transfer funds between own accounts")
 @allure.story("User should be able to transfer funds between own accounts")
+@pytest.mark.ui
 @pytest.mark.smoke
 class TestTransfer(BaseTest):
 

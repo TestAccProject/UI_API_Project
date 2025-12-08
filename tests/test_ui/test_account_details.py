@@ -10,6 +10,7 @@ from playwright.sync_api import Page
 
 @allure.feature("Account Overview")
 @allure.story("Account Number Is Verified")
+@pytest.mark.ui
 @pytest.mark.smoke
 class TestAccountOverview(BaseTest):
 

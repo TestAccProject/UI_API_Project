@@ -8,6 +8,7 @@ from utils.read_config import AppConfiguration
 
 @allure.feature("Login Page")
 @allure.story("Login Functionality")
+@pytest.mark.ui
 @pytest.mark.smoke
 class TestLogin(BaseTest):
     @allure.title("Valid Login")
