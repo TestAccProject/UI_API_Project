@@ -13,7 +13,7 @@ class BasePage:
 
     def __init__(self, page: Page):
         self.page = page
-        self.timeout = self._get_timeout()  # From config.json
+        self.timeout = self._get_timeout()  
         logger.info(f"Initialized BasePage with timeout: {self.timeout}ms")
 
     def _get_timeout(self):
