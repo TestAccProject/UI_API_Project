@@ -2,9 +2,9 @@ name: CI Pipeline for ParaBank QA Framework
 
 on:
   push:
-    branches: [main, master]
+    branches: [push]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -52,7 +52,7 @@ jobs:
       if: always()
       run: |
         mkdir -p reports/allure-report
-        allure generate reports/allure-results -o reports/allure-report --clean
+        allure generate reports/allure-report --clean reports/allure-results -o
         
     - name: Upload Allure HTML report
       if: always()
