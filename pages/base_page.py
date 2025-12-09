@@ -7,6 +7,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def get_text(locator):
+    text = locator.inner_text()
+    logger.debug(f"Extracted text from {locator}: {text}")
+    return text
+
+
 class BasePage:
     class _Selectors:
         pass
@@ -25,7 +31,6 @@ class BasePage:
             return 30000
 
     def navigate_to(self, url: str):
-        """Navigate to URL with logging."""
         self.page.goto(url)
         logger.info(f"Navigated to: {url}")
 
@@ -40,8 +45,3 @@ class BasePage:
         expect(locator).to_be_visible(timeout=timeout // 1000)
         locator.fill(text)
         logger.info(f"Filled {locator} with: {text}")
-
-    def get_text(self, locator):
-        text = locator.inner_text()
-        logger.debug(f"Extracted text from {locator}: {text}")
-        return text
